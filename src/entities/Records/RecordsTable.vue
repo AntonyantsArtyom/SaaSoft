@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { NInput, NSelect, NDynamicTags, NFormItem, NForm } from "naive-ui";
+import { NInput, NSelect, NDynamicTags, NFormItem, NForm, NButton, NIcon } from "naive-ui";
+import { TrashOutline } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
 import { useRecordsStore } from "./RecordsStore";
 import { RecordDataTypes } from "./RecordsTypes";
@@ -105,6 +106,13 @@ watch(
         <n-form-item :label="index === 0 ? 'Пароль' : undefined">
           <n-input v-model:value="record.password" type="password" placeholder="Введите пароль" />
         </n-form-item>
+        <n-form-item>
+          <n-button class="delete-button" quaternary type="error" @click="recordsStore.removeRecord(record.id)">
+            <n-icon>
+              <trash-outline />
+            </n-icon>
+          </n-button>
+        </n-form-item>
       </n-form>
     </div>
 
@@ -168,6 +176,7 @@ watch(
 
       .n-button {
         min-height: 34px;
+        margin-top: 0;
       }
     }
 
@@ -175,6 +184,18 @@ watch(
       min-height: unset;
       max-height: unset;
       height: 20px;
+    }
+
+    .delete-button {
+      .n-icon {
+        width: 24px;
+        height: 24px;
+
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+      }
     }
   }
 }
