@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <div class="help_message_container">
-    <n-icon><HelpCircleOutline /></n-icon>
+    <n-icon><help-circle-outline /></n-icon>
     <n-text>{{ text }}</n-text>
   </div>
 </template>
