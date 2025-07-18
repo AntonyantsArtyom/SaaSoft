@@ -17,8 +17,8 @@ defineProps<{
 <style scoped lang="scss">
 .help_message_container {
   margin: 16px 32px;
-  padding: 0 6px;
-  height: 40px;
+  padding: 6px;
+  min-height: 40px;
   display: flex;
   gap: 5px;
   align-items: center;
