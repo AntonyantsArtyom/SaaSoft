@@ -5,7 +5,7 @@ export const useRecordsStore = defineStore("RecordsStore", {
   state: (): RecordsDataState => ({
     records: [],
   }),
-
+  persist: true,
   actions: {
     addRecord(record: RecordData) {
       this.records.push(record);
