@@ -7,7 +7,7 @@ export interface RecordData {
   id: string;
   type: RecordDataTypes;
   login: string;
-  password?: string;
+  password: string | null;
   tags: string[];
 }
 

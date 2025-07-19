@@ -34,7 +34,7 @@ const newRecordTouched = ref({
 });
 
 const getValidationStatus = (value: unknown, touched: boolean) => {
-  if (!value || (Array.isArray(value) && value.length === 0)) {
+  if (!value || (typeof value === "string" && value.trim().length === 0) || (Array.isArray(value) && value.length === 0)) {
     return touched ? "error" : "warning";
   }
   return undefined;
@@ -92,7 +92,7 @@ watch(
   { deep: true }
 );
 
-const recordInputs = ref<Record<string, { login: string; password: string }>>({});
+const recordInputs = ref<Record<string, { login: string; password: string; loginError?: string; passwordError?: string }>>({});
 
 watch(
   () => records.value.map((r) => ({ id: r.id, login: r.login, password: r.password, type: r.type })),
@@ -126,18 +126,35 @@ watch(
         </n-form-item>
 
         <n-form-item :label="index === 0 ? 'Тип' : undefined">
-          <n-select :value="record.type" :options="typeOptions" placeholder="Выберите тип" @update:value="(val) => recordsStore.updateRecordField(record.id, 'type', val)" />
+          <n-select
+            :value="record.type"
+            :options="typeOptions"
+            placeholder="Выберите тип"
+            @update:value="
+              (val) => {
+                recordsStore.updateRecordField(record.id, 'type', val);
+                if (val === RecordDataTypes.LOCAL) {
+                  recordInputs[record.id].passwordError = 'Поле пароля не может быть пустым';
+                }
+              }
+            "
+          />
         </n-form-item>
 
         <div class="keyboard_inputs">
-          <n-form-item :label="index === 0 ? 'Логин' : undefined" :validation-status="record.login.trim() ? undefined : 'error'" :feedback="record.login.trim() ? undefined : 'Введите логин'">
+          <n-form-item :label="index === 0 ? 'Логин' : undefined" :validation-status="recordInputs[record.id].loginError ? 'error' : undefined" :feedback="recordInputs[record.id].loginError">
             <n-input
               v-model:value="recordInputs[record.id].login"
               placeholder="Введите логин"
               @blur="
                 () => {
                   const value = recordInputs[record.id].login.trim();
-                  if (value) recordsStore.updateRecordField(record.id, 'login', value);
+                  if (value.length > 0) {
+                    recordInputs[record.id].loginError = undefined;
+                    recordsStore.updateRecordField(record.id, 'login', value);
+                  } else {
+                    recordInputs[record.id].loginError = 'Поле логина не может быть пустым';
+                  }
                 }
               "
             />
@@ -146,8 +163,8 @@ watch(
           <n-form-item
             v-if="record.type === RecordDataTypesEnum.LOCAL"
             :label="index === 0 ? 'Пароль' : undefined"
-            :validation-status="record.password?.trim() ? undefined : 'error'"
-            :feedback="record.password?.trim() ? undefined : 'Введите пароль'"
+            :validation-status="recordInputs[record.id].passwordError ? 'error' : undefined"
+            :feedback="recordInputs[record.id].passwordError"
           >
             <n-input
               v-model:value="recordInputs[record.id].password"
@@ -155,7 +172,12 @@ watch(
               @blur="
                 () => {
                   const value = recordInputs[record.id].password.trim();
-                  if (value) recordsStore.updateRecordField(record.id, 'password', value);
+                  if (value.length > 0) {
+                    recordInputs[record.id].passwordError = undefined;
+                    recordsStore.updateRecordField(record.id, 'password', value);
+                  } else {
+                    recordInputs[record.id].passwordError = 'Поле пароля не может быть пустым';
+                  }
                 }
               "
             />

@@ -32,7 +32,7 @@ export const useRecordsStore = defineStore("RecordsStore", {
       record[field] = value;
 
       if (field === "type" && value === RecordDataTypes.LDAP) {
-        delete record.password;
+        record.password = null;
       }
     },
     removeRecord(id: string) {
