@@ -7,6 +7,8 @@ import { useRecordsStore } from "./RecordsStore";
 import { RecordDataTypes } from "./RecordsTypes";
 import { useAppStateStore } from "../../shared/AppStateStore";
 
+const RecordDataTypesEnum = RecordDataTypes;
+
 const AppStateStore = useAppStateStore();
 const { isAddingNewRecord } = storeToRefs(AppStateStore);
 
@@ -57,9 +59,10 @@ watch(isAddingNewRecord, (isAdding) => {
 watch(
   [() => ({ ...newRecord.value }), () => ({ ...newRecordTouched.value })],
   ([recordDraft, touched]) => {
-    const isComplete = recordDraft.type !== null && recordDraft.login.trim().length > 0 && recordDraft.password.trim().length > 0;
+    const isLocal = recordDraft.type === RecordDataTypes.LOCAL;
+    const isComplete = recordDraft.type !== null && recordDraft.login.trim().length > 0 && (!isLocal || recordDraft.password.trim().length > 0);
 
-    const allTouched = touched.type && touched.login && touched.password;
+    const allTouched = touched.type && touched.login && (!isLocal || touched.password);
 
     if (isComplete && allTouched) {
       recordsStore.addRecord({
@@ -104,7 +107,8 @@ watch(
           <n-form-item :label="index === 0 ? 'Логин' : undefined">
             <n-input v-model:value="record.login" placeholder="Введите логин" />
           </n-form-item>
-          <n-form-item :label="index === 0 ? 'Пароль' : undefined">
+
+          <n-form-item v-if="record.type === RecordDataTypesEnum.LOCAL" :label="index === 0 ? 'Пароль' : undefined">
             <n-input v-model:value="record.password" type="password" placeholder="Введите пароль" />
           </n-form-item>
         </div>
@@ -141,6 +145,7 @@ watch(
           </n-form-item>
 
           <n-form-item
+            v-if="newRecord.type === RecordDataTypesEnum.LOCAL"
             :label="records.length === 0 ? 'Пароль' : undefined"
             :validation-status="getValidationStatus(newRecord.password, newRecordTouched.password)"
             :feedback="!newRecord.password ? 'Введите пароль' : undefined"
@@ -163,9 +168,12 @@ watch(
   }
 
   .keyboard_inputs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 5px;
+
+    > * {
+      flex: 1 1 0;
+    }
   }
 
   .record-form {
