@@ -14,7 +14,7 @@ const recordsStore = useRecordsStore();
 const { records } = storeToRefs(recordsStore);
 
 const typeOptions = [
-  { label: "Local", value: RecordDataTypes.LOCAL },
+  { label: "Локальная", value: RecordDataTypes.LOCAL },
   { label: "LDAP", value: RecordDataTypes.LDAP },
 ];
 
@@ -100,12 +100,14 @@ watch(
         <n-form-item :label="index === 0 ? 'Тип' : undefined">
           <n-select v-model:value="record.type" :options="typeOptions" placeholder="Выберите тип" />
         </n-form-item>
-        <n-form-item :label="index === 0 ? 'Логин' : undefined">
-          <n-input v-model:value="record.login" placeholder="Введите логин" />
-        </n-form-item>
-        <n-form-item :label="index === 0 ? 'Пароль' : undefined">
-          <n-input v-model:value="record.password" type="password" placeholder="Введите пароль" />
-        </n-form-item>
+        <div class="keyboard_inputs">
+          <n-form-item :label="index === 0 ? 'Логин' : undefined">
+            <n-input v-model:value="record.login" placeholder="Введите логин" />
+          </n-form-item>
+          <n-form-item :label="index === 0 ? 'Пароль' : undefined">
+            <n-input v-model:value="record.password" type="password" placeholder="Введите пароль" />
+          </n-form-item>
+        </div>
         <n-form-item>
           <n-button class="delete-button" quaternary type="error" @click="recordsStore.removeRecord(record.id)">
             <n-icon>
@@ -129,22 +131,23 @@ watch(
         >
           <n-select v-model:value="newRecord.type" :options="typeOptions" placeholder="Выберите тип" @blur="newRecordTouched.type = true" />
         </n-form-item>
+        <div class="keyboard_inputs">
+          <n-form-item
+            :label="records.length === 0 ? 'Логин' : undefined"
+            :validation-status="getValidationStatus(newRecord.login, newRecordTouched.login)"
+            :feedback="!newRecord.login ? 'Введите логин' : undefined"
+          >
+            <n-input v-model:value="newRecord.login" placeholder="Введите логин" @blur="newRecordTouched.login = true" />
+          </n-form-item>
 
-        <n-form-item
-          :label="records.length === 0 ? 'Логин' : undefined"
-          :validation-status="getValidationStatus(newRecord.login, newRecordTouched.login)"
-          :feedback="!newRecord.login ? 'Введите логин' : undefined"
-        >
-          <n-input v-model:value="newRecord.login" placeholder="Введите логин" @blur="newRecordTouched.login = true" />
-        </n-form-item>
-
-        <n-form-item
-          :label="records.length === 0 ? 'Пароль' : undefined"
-          :validation-status="getValidationStatus(newRecord.password, newRecordTouched.password)"
-          :feedback="!newRecord.password ? 'Введите пароль' : undefined"
-        >
-          <n-input v-model:value="newRecord.password" type="password" placeholder="Введите пароль" @blur="newRecordTouched.password = true" />
-        </n-form-item>
+          <n-form-item
+            :label="records.length === 0 ? 'Пароль' : undefined"
+            :validation-status="getValidationStatus(newRecord.password, newRecordTouched.password)"
+            :feedback="!newRecord.password ? 'Введите пароль' : undefined"
+          >
+            <n-input v-model:value="newRecord.password" type="password" placeholder="Введите пароль" @blur="newRecordTouched.password = true" />
+          </n-form-item>
+        </div>
       </n-form>
     </div>
   </div>
@@ -159,15 +162,16 @@ watch(
     padding: 0 32px;
   }
 
-  .record-form {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    flex-wrap: wrap;
+  .keyboard_inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
 
-    .n-form-item {
-      flex: 1 1 200px;
-    }
+  .record-form {
+    display: grid;
+    grid-template-columns: minmax(200px, 500px) 130px minmax(300px, 1200px) 50px;
+    gap: 5px;
 
     ::v-deep(.n-dynamic-tags) {
       .n-tag {
