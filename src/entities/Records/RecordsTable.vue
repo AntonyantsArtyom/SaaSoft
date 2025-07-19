@@ -66,7 +66,7 @@ watch(
 
     if (isComplete && allTouched) {
       recordsStore.addRecord({
-        id: new Date().toString(),
+        id: new Date().toISOString(),
         tags: recordDraft.tags,
         type: recordDraft.type!,
         login: recordDraft.login.trim(),
@@ -91,6 +91,30 @@ watch(
   },
   { deep: true }
 );
+
+const recordInputs = ref<Record<string, { login: string; password: string }>>({});
+
+watch(
+  () => records.value.map((r) => ({ id: r.id, login: r.login, password: r.password, type: r.type })),
+  (val) => {
+    val.forEach((r) => {
+      const local = recordInputs.value[r.id];
+
+      if (!local) {
+        recordInputs.value[r.id] = {
+          login: r.login,
+          password: r.password || "",
+        };
+      } else {
+        local.login = r.login;
+        if (!r.password && local.password !== "") {
+          local.password = "";
+        }
+      }
+    });
+  },
+  { immediate: true, deep: false }
+);
 </script>
 
 <template>
@@ -98,20 +122,46 @@ watch(
     <div v-for="(record, index) in records" :key="record.id" class="record-row">
       <n-form label-placement="top" class="record-form">
         <n-form-item :label="index === 0 ? 'Метки' : undefined">
-          <n-dynamic-tags v-model:value="record.tags" />
+          <n-dynamic-tags :value="record.tags" @update:value="(value: string[]) => recordsStore.updateRecordField(record.id, 'tags', value)" />
         </n-form-item>
+
         <n-form-item :label="index === 0 ? 'Тип' : undefined">
-          <n-select v-model:value="record.type" :options="typeOptions" placeholder="Выберите тип" />
+          <n-select :value="record.type" :options="typeOptions" placeholder="Выберите тип" @update:value="(val) => recordsStore.updateRecordField(record.id, 'type', val)" />
         </n-form-item>
+
         <div class="keyboard_inputs">
-          <n-form-item :label="index === 0 ? 'Логин' : undefined">
-            <n-input v-model:value="record.login" placeholder="Введите логин" />
+          <n-form-item :label="index === 0 ? 'Логин' : undefined" :validation-status="record.login.trim() ? undefined : 'error'" :feedback="record.login.trim() ? undefined : 'Введите логин'">
+            <n-input
+              v-model:value="recordInputs[record.id].login"
+              placeholder="Введите логин"
+              @blur="
+                () => {
+                  const value = recordInputs[record.id].login.trim();
+                  if (value) recordsStore.updateRecordField(record.id, 'login', value);
+                }
+              "
+            />
           </n-form-item>
 
-          <n-form-item v-if="record.type === RecordDataTypesEnum.LOCAL" :label="index === 0 ? 'Пароль' : undefined">
-            <n-input v-model:value="record.password" type="password" placeholder="Введите пароль" />
+          <n-form-item
+            v-if="record.type === RecordDataTypesEnum.LOCAL"
+            :label="index === 0 ? 'Пароль' : undefined"
+            :validation-status="record.password?.trim() ? undefined : 'error'"
+            :feedback="record.password?.trim() ? undefined : 'Введите пароль'"
+          >
+            <n-input
+              v-model:value="recordInputs[record.id].password"
+              placeholder="Введите пароль"
+              @blur="
+                () => {
+                  const value = recordInputs[record.id].password.trim();
+                  if (value) recordsStore.updateRecordField(record.id, 'password', value);
+                }
+              "
+            />
           </n-form-item>
         </div>
+
         <n-form-item>
           <n-button class="delete-button" quaternary type="error" @click="recordsStore.removeRecord(record.id)">
             <n-icon>
@@ -135,6 +185,7 @@ watch(
         >
           <n-select v-model:value="newRecord.type" :options="typeOptions" placeholder="Выберите тип" @blur="newRecordTouched.type = true" />
         </n-form-item>
+
         <div class="keyboard_inputs">
           <n-form-item
             :label="records.length === 0 ? 'Логин' : undefined"
@@ -150,7 +201,7 @@ watch(
             :validation-status="getValidationStatus(newRecord.password, newRecordTouched.password)"
             :feedback="!newRecord.password ? 'Введите пароль' : undefined"
           >
-            <n-input v-model:value="newRecord.password" type="password" placeholder="Введите пароль" @blur="newRecordTouched.password = true" />
+            <n-input v-model:value="newRecord.password" placeholder="Введите пароль" @blur="newRecordTouched.password = true" />
           </n-form-item>
         </div>
       </n-form>

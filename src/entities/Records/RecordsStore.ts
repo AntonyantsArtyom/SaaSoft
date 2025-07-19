@@ -25,7 +25,16 @@ export const useRecordsStore = defineStore("RecordsStore", {
     addRecord(record: RecordData) {
       this.records.push(record);
     },
+    updateRecordField<K extends keyof RecordData>(id: string, field: K, value: RecordData[K]) {
+      const record = this.records.find((r) => r.id === id);
+      if (!record) return;
 
+      record[field] = value;
+
+      if (field === "type" && value === RecordDataTypes.LDAP) {
+        delete record.password;
+      }
+    },
     removeRecord(id: string) {
       this.records = this.records.filter((record) => record.id !== id);
     },
