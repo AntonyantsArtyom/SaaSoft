@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import RecordsTable from "./entities/Records/RecordsTable.vue";
+import RecordsTable from "./features/RecordsTable.vue";
 import AddRecordForm from "./features/AddRecordForm.vue";
 import { NConfigProvider } from "naive-ui";
 </script>

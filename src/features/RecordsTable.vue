@@ -3,9 +3,9 @@ import { ref, watch } from "vue";
 import { NInput, NSelect, NDynamicTags, NFormItem, NForm, NButton, NIcon } from "naive-ui";
 import { TrashOutline } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
-import { useRecordsStore } from "./RecordsStore";
-import { RecordDataTypes } from "./RecordsTypes";
-import { useAppStateStore } from "../../shared/AppStateStore";
+import { useRecordsStore } from "../entities/Records/RecordsStore";
+import { RecordDataTypes } from "../entities/Records/RecordsTypes";
+import { useAppStateStore } from "../shared/AppStateStore";
 
 const RecordDataTypesEnum = RecordDataTypes;
 
